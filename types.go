@@ -1,11 +1,11 @@
-package gohakuna
+package hakuna
 
 import "time"
 
 type Absence struct {
 	ID                   int         `json:"id"`
-	StartDate            string      `json:"start_date"`
-	EndDate              string      `json:"end_date"`
+	StartDate            time.Time   `json:"start_date"`
+	EndDate              time.Time   `json:"end_date"`
 	FirstHalfDay         bool        `json:"first_half_day"`
 	SecondHalfDay        bool        `json:"second_half_day"`
 	IsRecurring          bool        `json:"is_recurring"`
@@ -47,7 +47,7 @@ type Vacation struct {
 
 type Overview struct {
 	Overtime          string   `json:"overtime"`
-	OvertimeInSeconds int      `json:"overtime_in_seconds"`
+	OvertimeInSeconds float64  `json:"overtime_in_seconds"`
 	Vacation          Vacation `json:"vacation"`
 }
 
@@ -63,7 +63,7 @@ type TimeEntry struct {
 	StartTime         string  `json:"start_time"`
 	EndTime           string  `json:"end_time"`
 	Duration          string  `json:"duration"`
-	DurationInSeconds int     `json:"duration_in_seconds"`
+	DurationInSeconds float64 `json:"duration_in_seconds"`
 	Note              string  `json:"note"`
 	User              User    `json:"user"`
 	Task              Task    `json:"task"`
@@ -81,4 +81,29 @@ type User struct {
 	ID     int      `json:"id"`
 	Name   string   `json:"name"`
 	Groups []string `json:"groups"`
+}
+
+type StartTimerReq struct {
+	TaskId    int    `json:"task_id"`
+	StartTime string `json:"start_time,omitempty"`
+	ProjectId int    `json:"project_id,omitempty"`
+	Note      string `json:"note,omitempty"`
+}
+
+type StopTimerReq struct {
+	EndTime string `json:"end_time"`
+}
+
+type ResponeError struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
+type CreatTimeEntryReq struct {
+	Date      string `json:"date"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
+	Note      string `json:"note"`
+	ProjectID int    `json:"project_id"`
+	TaskID    int    `json:"task_id"`
 }
