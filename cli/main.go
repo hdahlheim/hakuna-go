@@ -20,6 +20,7 @@ func main() {
 
 	flag.Parse()
 
+	// minor: initialize the variables when needed, e.g. read tokenEnv when you check the token
 	subdomain := os.Getenv("HAKUNA_CLI_SUBDOMAIN")
 	tokenEnv := os.Getenv("HAKUNA_CLI_API_TOKEN")
 
@@ -40,7 +41,16 @@ func main() {
 	}
 
 	client := http.Client{Timeout: time.Second * 2}
+	// good: that you allow the caller to specify a client
 	h := hakuna.New(subdomain, token, client)
+
+	// use a switch instead of if-else
+	//switch {
+	//case *pingAPI:
+	//	// do stuff
+	//case *stopTimer:
+	//	// do stuff
+	//}
 
 	if *pingAPI {
 		fmt.Fprintf(os.Stderr, "Ping API\n")

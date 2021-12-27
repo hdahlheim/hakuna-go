@@ -17,12 +17,14 @@ type Hakuna struct {
 	Client    http.Client
 }
 
+// no need to be public
 type Request struct {
 	Method   string
 	Endpoint string
 	Body     []byte
 }
 
+// no need to be public
 type Response struct {
 	StatusCode int
 	Body       []byte
@@ -38,15 +40,20 @@ func (h Hakuna) Ping() Pong {
 
 	var pong Pong
 	if err := json.Unmarshal(res.Body, &pong); err != nil {
+		// I would bobble up the error instead of logging it,
+		// this removes the log dependency in the library and gives the caller the freedom to deal with the error.
 		log.Fatal("Error decoding pong response")
 	}
 
+	// instead of returning the struct, here i would return time.Time or Time.Duration
+	// results: "return (time.Time,error)
 	return pong
 }
 
 func (h Hakuna) StartTimer(data StartTimerReq) (Timer, error) {
 	reqBody, err := json.Marshal(&data)
 	if err != nil {
+		// same: return error
 		log.Fatal("Error creating request body")
 	}
 
@@ -66,6 +73,8 @@ func (h Hakuna) StartTimer(data StartTimerReq) (Timer, error) {
 	return timer, nil
 }
 
+// public methods and functions should be documented, e.g.
+// StopTimer does soemthing
 func (h Hakuna) StopTimer() (TimeEntry, error) {
 	now := time.Now()
 	timeString := fmt.Sprintf("%d:%d", now.Hour(), now.Minute())
@@ -85,6 +94,11 @@ func (h Hakuna) StopTimer() (TimeEntry, error) {
 	if err := getResponeError(res); err != nil {
 		return timeEntry, err
 	}
+	// instead of returning the Zero valued struct, you could simply return a pointer
+	// func (h Hakuna) StopTimer() (*TimeEntry, error){
+	// ....
+	// return nil, err
+	//}
 
 	if err := json.Unmarshal(res.Body, &timeEntry); err != nil {
 		return timeEntry, errors.New("Error decoding response")
@@ -110,6 +124,7 @@ func (h Hakuna) request(req Request) Response {
 	}
 	defer resp.Body.Close()
 
+	// todo: if the server starts sending random data and never sends an EOF, the CLI will die due to an Out of memory
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal("Error reading body. ", err)
@@ -123,6 +138,9 @@ func getResponeError(res Response) error {
 
 	if res.StatusCode >= 300 {
 		if err := json.Unmarshal(res.Body, &apiError); err != nil {
+			// this assumes that you will always get a json response.
+			// what happens if a proxy on front of the api returns a 5xx. ?
+			// better to check if the payload is json, if not return a standard error with the return code
 			return errors.New("Error decoding response")
 		}
 		return errors.New(apiError.Message)

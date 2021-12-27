@@ -90,6 +90,7 @@ type StartTimerReq struct {
 	Note      string `json:"note,omitempty"`
 }
 
+// no need to be public
 type StopTimerReq struct {
 	EndTime string `json:"end_time"`
 }
