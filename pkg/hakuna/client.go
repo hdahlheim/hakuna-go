@@ -1,12 +1,14 @@
+/*
+Copyright © 2021 Henning Dahlheim <hactar@cyberkraft.ch>
+
+*/
 package hakuna
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
@@ -28,12 +30,48 @@ type response struct {
 	Body       []byte
 }
 
-func New(subDomain string, token string, client http.Client) Hakuna {
-	return Hakuna{SubDomain: subDomain, Token: token, Client: client}
+func New(subDomain string, token string, client http.Client) (*Hakuna, error) {
+	switch {
+	case subDomain == "":
+		return nil, errors.New("subdomain can not be empty string")
+	case token == "":
+		return nil, errors.New("api token can not be empty string")
+	default:
+		return &Hakuna{SubDomain: subDomain, Token: token, Client: client}, nil
+	}
+}
+
+func NewStartTimerReq(taskId int, startTime time.Time, note string, projectId int) (*StartTimerReq, error) {
+	req := &StartTimerReq{
+		TaskId:    taskId,
+		StartTime: startTime.Format("13:37"),
+	}
+
+	switch {
+	case req.TaskId == 0:
+		return nil, errors.New("taskId must be greater than 0")
+	case projectId != 0:
+		req.ProjectId = projectId
+	case note != "":
+		req.Note = note
+	}
+
+	return req, nil
+}
+
+func NewStopTimerReq(time time.Time) (*StopTimerReq, error) {
+	req := &StopTimerReq{
+		EndTime: time.Format("13:37"),
+	}
+
+	return req, nil
 }
 
 func (h Hakuna) Ping() (Pong, error) {
-	req := request{Method: "GET", Endpoint: "/ping"}
+	req := request{
+		Method:   "GET",
+		Endpoint: "/ping",
+	}
 	res, err := h.request(req)
 	if err != nil {
 		return Pong{}, err
@@ -47,24 +85,51 @@ func (h Hakuna) Ping() (Pong, error) {
 	return pong, nil
 }
 
-func (h Hakuna) StartTimer(data StartTimerReq) (Timer, error) {
+func (h Hakuna) GetTimer() (Timer, error) {
+	req := request{
+		Method:   "GET",
+		Endpoint: "/timer",
+	}
+	res, err := h.request(req)
+	if err != nil {
+		return Timer{}, err
+	}
+
+	if err := getResponeError(res); err != nil {
+		return Timer{}, err
+	}
+
 	var timer Timer
+	if err := json.Unmarshal(res.Body, &timer); err != nil {
+		return Timer{}, err
+	}
+
+	return timer, nil
+}
+
+func (h Hakuna) StartTimer(data *StartTimerReq) (Timer, error) {
 
 	reqBody, err := json.Marshal(&data)
 	if err != nil {
 		return Timer{}, err
 	}
 
-	req := request{Method: "POST", Endpoint: "/timer", Body: reqBody}
+	req := request{
+		Method:   "POST",
+		Endpoint: "/timer",
+		Body:     reqBody,
+	}
+
 	res, err := h.request(req)
 	if err != nil {
-		return timer, err
+		return Timer{}, err
 	}
 
 	if err := getResponeError(res); err != nil {
-		return timer, err
+		return Timer{}, err
 	}
 
+	var timer Timer
 	if err := json.Unmarshal(res.Body, &timer); err != nil {
 		return timer, err
 	}
@@ -72,13 +137,8 @@ func (h Hakuna) StartTimer(data StartTimerReq) (Timer, error) {
 	return timer, nil
 }
 
-func (h Hakuna) StopTimer() (TimeEntry, error) {
-	now := time.Now()
-	timeString := fmt.Sprintf("%d:%d", now.Hour(), now.Minute())
-
-	reqData := StopTimerReq{EndTime: timeString}
-
-	reqBody, err := json.Marshal(&reqData)
+func (h Hakuna) StopTimer(data *StopTimerReq) (TimeEntry, error) {
+	reqBody, err := json.Marshal(&data)
 	if err != nil {
 		return TimeEntry{}, err
 	}
@@ -101,12 +161,34 @@ func (h Hakuna) StopTimer() (TimeEntry, error) {
 	return timeEntry, nil
 }
 
+func (h Hakuna) GetTimeEntries(start time.Time, end time.Time) ([]TimeEntry, error) {
+	req := request{
+		Method:   "GET",
+		Endpoint: "/time_entries?start_date=" + start.Format("2006-01-15") + "&" + "end_date=" + end.Format("2006-01-15"),
+	}
+	res, err := h.request(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := getResponeError(res); err != nil {
+		return nil, err
+	}
+
+	var timeEntries []TimeEntry
+	if err := json.Unmarshal(res.Body, &timeEntries); err != nil {
+		return timeEntries, errors.New("error decoding response")
+	}
+
+	return timeEntries, nil
+}
+
 func (h Hakuna) request(req request) (response, error) {
 	url := "https://" + h.SubDomain + ".hakuna.ch/api/v1" + req.Endpoint
 
 	rq, err := http.NewRequest(req.Method, url, bytes.NewBuffer(req.Body))
 	if err != nil {
-		log.Fatal("Error doing Request", err)
+		return response{}, err
 	}
 
 	rq.Header.Set("Content-Type", "application/json; charset=utf-8")

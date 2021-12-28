@@ -1,3 +1,7 @@
+/*
+Copyright © 2021 Henning Dahlheim <hactar@cyberkraft.ch>
+
+*/
 package hakuna
 
 import "time"
@@ -59,22 +63,26 @@ type Task struct {
 
 type TimeEntry struct {
 	ID                int     `json:"id"`
+	Note              string  `json:"note"`
 	Date              string  `json:"date"`
-	StartTime         string  `json:"start_time"`
-	EndTime           string  `json:"end_time"`
 	Duration          string  `json:"duration"`
 	DurationInSeconds float64 `json:"duration_in_seconds"`
-	Note              string  `json:"note"`
+	StartTime         string  `json:"start_time"`
+	EndTime           string  `json:"end_time"`
 	User              User    `json:"user"`
 	Task              Task    `json:"task"`
 	Project           Project `json:"project"`
 }
 
 type Timer struct {
-	Note      string `json:"note"`
-	StartTime string `json:"start_time"`
-	ProjectID string `json:"project_id"`
-	TaskID    string `json:"task_id"`
+	Note              string  `json:"note"`
+	Date              string  `json:"date"`
+	Duration          string  `json:"duration"`
+	DurationInSeconds float64 `json:"duration_in_seconds"`
+	StartTime         string  `json:"start_time"`
+	User              User    `json:"user"`
+	Task              Task    `json:"task"`
+	Project           Project `json:"project"`
 }
 
 type User struct {
@@ -107,3 +115,8 @@ type CreatTimeEntryReq struct {
 	ProjectID int    `json:"project_id"`
 	TaskID    int    `json:"task_id"`
 }
+
+// type ListTimeEntriesReq struct {
+// 	StartDate string `json:"start_date"`
+// 	EndDate   string `json:"end_date"`
+// }
