@@ -44,7 +44,7 @@ func New(subDomain string, token string, client http.Client) (*Hakuna, error) {
 func NewStartTimerReq(taskId int, startTime time.Time, note string, projectId int) (*StartTimerReq, error) {
 	req := &StartTimerReq{
 		TaskId:    taskId,
-		StartTime: startTime.Format("13:37"),
+		StartTime: startTime.Format("15:04"),
 	}
 
 	switch {
@@ -61,7 +61,7 @@ func NewStartTimerReq(taskId int, startTime time.Time, note string, projectId in
 
 func NewStopTimerReq(time time.Time) (*StopTimerReq, error) {
 	req := &StopTimerReq{
-		EndTime: time.Format("13:37"),
+		EndTime: time.Format("15:04"),
 	}
 
 	return req, nil
@@ -164,7 +164,7 @@ func (h Hakuna) StopTimer(data *StopTimerReq) (TimeEntry, error) {
 func (h Hakuna) GetTimeEntries(start time.Time, end time.Time) ([]TimeEntry, error) {
 	req := request{
 		Method:   "GET",
-		Endpoint: "/time_entries?start_date=" + start.Format("2006-01-15") + "&" + "end_date=" + end.Format("2006-01-15"),
+		Endpoint: "/time_entries?start_date=" + start.Format("2006-01-02") + "&" + "end_date=" + end.Format("2006-01-02"),
 	}
 	res, err := h.request(req)
 	if err != nil {

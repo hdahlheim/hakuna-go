@@ -35,6 +35,7 @@ var stopTimerCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(timerCmd)
 	timerCmd.AddCommand(startTimerCmd, stopTimerCmd)
+
 	startTimerCmd.Flags().IntP("taskId", "T", 0, "--taskId=1")
 	startTimerCmd.Flags().StringP("startTime", "S", "now", "--startTime=\"12:30\"")
 	startTimerCmd.Flags().StringP("note", "N", "", "--note=\"Honest work!\"")
@@ -55,7 +56,7 @@ func getTimer(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	fmt.Printf("Timer running since %v %v\n", timer.Date, timer.StartTime)
+	fmt.Printf("Timer running since %v %v\nDuration:\t%v\nTask:\t\t%v\n", timer.Date, timer.StartTime, timer.Duration, timer.Task.Name)
 	return nil
 }
 
@@ -70,7 +71,7 @@ func startTimer(cmd *cobra.Command, args []string) error {
 	}
 
 	var startTime time.Time
-	startTimeStr, err := cmd.LocalFlags().GetString("stopTime")
+	startTimeStr, err := cmd.LocalFlags().GetString("startTime")
 	if err != nil {
 		return err
 	} else {
@@ -93,26 +94,30 @@ func startTimer(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Printf("%v\n", timer.StartTime)
+	fmt.Printf("Timer started at %v\n", timer.StartTime)
 	return nil
 }
 
 func stopTimer(cmd *cobra.Command, args []string) error {
 	h := getHakunaClient()
 
-	var stopTime time.Time
-	stopTimeFlag, err := cmd.LocalFlags().GetString("startTime")
+	endTimeFlag, err := cmd.LocalFlags().GetString("endTime")
 	if err != nil {
 		return err
-	} else {
-		pTime, err := lib.ParseTime(stopTimeFlag)
+	}
+
+	var endTime time.Time
+	if endTimeFlag != "" {
+		pTime, err := lib.ParseTime(endTimeFlag)
 		if err != nil {
 			return err
 		}
-		stopTime = pTime
+		endTime = pTime
+	} else {
+		endTime = time.Now()
 	}
 
-	data, err := hakuna.NewStopTimerReq(stopTime)
+	data, err := hakuna.NewStopTimerReq(endTime)
 	if err != nil {
 		return err
 	}
