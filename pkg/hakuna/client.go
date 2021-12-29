@@ -183,6 +183,28 @@ func (h Hakuna) GetTimeEntries(start time.Time, end time.Time) ([]TimeEntry, err
 	return timeEntries, nil
 }
 
+func (h Hakuna) GetOverview() (Overview, error) {
+	req := request{
+		Method:   "GET",
+		Endpoint: "/overview",
+	}
+	res, err := h.request(req)
+	if err != nil {
+		return Overview{}, err
+	}
+
+	if err := getResponeError(res); err != nil {
+		return Overview{}, err
+	}
+
+	var overview Overview
+	if err := json.Unmarshal(res.Body, &overview); err != nil {
+		return overview, errors.New("error decoding response")
+	}
+
+	return overview, nil
+}
+
 func (h Hakuna) request(req request) (response, error) {
 	url := "https://" + h.SubDomain + ".hakuna.ch/api/v1" + req.Endpoint
 
