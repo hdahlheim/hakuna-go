@@ -5,34 +5,26 @@ Copyright © 2021 Henning Dahlheim hactar@cyberkraft.ch
 package cmd
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/hdahlheim/hakuna-go/internal/config"
 	"github.com/hdahlheim/hakuna-go/pkg/hakuna"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
+var debug bool
 var cfgFile string
-
-type configData struct {
-	Subdomain     string
-	APIToken      string
-	DefaultTaskId int
-}
-
-var config configData
+var cliConfig *config.Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "hakuna",
 	Short: "A cli to interact with the hakuna time tracking tool.",
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cmd.SilenceUsage = true
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -46,60 +38,37 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.hakuna-cli.yaml)")
-	rootCmd.PersistentFlags().String("subdomain", "", "--subdomain=[hakuan-api-key]")
-	rootCmd.PersistentFlags().String("token", "", "--token=[hakuan-api-key]")
-	viper.BindPFlag("subdomain", rootCmd.Flags().Lookup("subdomain"))
-	viper.BindPFlag("api_token", rootCmd.Flags().Lookup("token"))
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (if not provided the lockup order is ./.hakuna.yaml, $HOME/.hakuna.yaml)")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "print debug information")
+	rootCmd.PersistentFlags().String("subdomain", "", "--subdomain=[hakuna-api-key]")
+	rootCmd.PersistentFlags().String("token", "", "--token=[hakuna-api-key]")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	config.BindSubdomainFlag(rootCmd.PersistentFlags().Lookup("subdomain"))
+	config.BindTokenFlag(rootCmd.PersistentFlags().Lookup("token"))
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".cli" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".hakuna-cli")
+		config.SetConfigFile(cfgFile)
 	}
 
-	viper.SetEnvPrefix("HAKUNA_CLI")
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	if debug {
+		config.EnableDebug()
 	}
 
-	if err := viper.Unmarshal(&config); err != nil {
-		fmt.Fprintf(os.Stderr, "unable to decode into struct, %v", err)
-	}
+	cfg, err := config.InitConfig()
+	cobra.CheckErr(err)
+	cliConfig = cfg
 }
 
-func getHakunaClient() *hakuna.Hakuna {
+func initHakunaClient() *hakuna.Hakuna {
 	client := http.Client{Timeout: 1 * time.Second}
-	subdomain := viper.GetString("subdomain")
-	token := viper.GetString("api_token")
+	subdomain := cliConfig.Subdomain
+	token := cliConfig.Token
 
 	h, err := hakuna.New(subdomain, token, client)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
+	cobra.CheckErr(err)
 
 	return h
 }

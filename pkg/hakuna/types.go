@@ -8,8 +8,8 @@ import "time"
 
 type Absence struct {
 	ID                   int         `json:"id"`
-	StartDate            time.Time   `json:"start_date"`
-	EndDate              time.Time   `json:"end_date"`
+	StartDate            string      `json:"start_date"`
+	EndDate              string      `json:"end_date"`
 	FirstHalfDay         bool        `json:"first_half_day"`
 	SecondHalfDay        bool        `json:"second_half_day"`
 	IsRecurring          bool        `json:"is_recurring"`

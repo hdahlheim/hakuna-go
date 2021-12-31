@@ -23,7 +23,7 @@ func ParseTime(input string) (time.Time, error) {
 
 func parse(input string, re *regexp.Regexp) (time.Time, error) {
 	if re.MatchString(input) {
-		startTime, err := time.Parse("2006-01-15", input)
+		startTime, err := time.Parse("15:04", input)
 		if err != nil {
 			return time.Time{}, err
 		}

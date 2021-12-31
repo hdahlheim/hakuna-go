@@ -14,7 +14,7 @@ import (
 // pingCmd represents the ping command
 var pingCmd = &cobra.Command{
 	Use:   "ping",
-	Short: "Test the api connection.",
+	Short: "Test the api connection",
 	RunE:  pingAPI,
 }
 
@@ -23,7 +23,7 @@ func init() {
 }
 
 func pingAPI(cmd *cobra.Command, args []string) error {
-	h := getHakunaClient()
+	h := initHakunaClient()
 	fmt.Fprintf(os.Stderr, "Pinging api...\n")
 	pong, err := h.Ping()
 	if err != nil {

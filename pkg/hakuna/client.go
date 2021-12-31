@@ -205,6 +205,52 @@ func (h Hakuna) GetOverview() (Overview, error) {
 	return overview, nil
 }
 
+func (h Hakuna) GetTasks() ([]Task, error) {
+	req := request{
+		Method:   "GET",
+		Endpoint: "/tasks",
+	}
+
+	res, err := h.request(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := getResponeError(res); err != nil {
+		return nil, err
+	}
+
+	var tasks []Task
+	if err := json.Unmarshal(res.Body, &tasks); err != nil {
+		return tasks, errors.New("error decoding response")
+	}
+
+	return tasks, nil
+}
+
+func (h Hakuna) GetAbsences(year string) ([]Absence, error) {
+	req := request{
+		Method:   "GET",
+		Endpoint: "/absences?year=" + year,
+	}
+
+	res, err := h.request(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := getResponeError(res); err != nil {
+		return nil, err
+	}
+
+	var absences []Absence
+	if err := json.Unmarshal(res.Body, &absences); err != nil {
+		return absences, err
+	}
+
+	return absences, nil
+}
+
 func (h Hakuna) request(req request) (response, error) {
 	url := "https://" + h.SubDomain + ".hakuna.ch/api/v1" + req.Endpoint
 

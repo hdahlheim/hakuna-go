@@ -13,26 +13,16 @@ import (
 // overviewCmd represents the overview command
 var overviewCmd = &cobra.Command{
 	Use:   "overview",
-	Short: "A brief description of your command",
+	Short: "Show your overtime and vactation days",
 	RunE:  getOverview,
 }
 
 func init() {
 	rootCmd.AddCommand(overviewCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// overviewCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// overviewCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func getOverview(cmd *cobra.Command, args []string) error {
-	h := getHakunaClient()
+	h := initHakunaClient()
 
 	overview, err := h.GetOverview()
 	if err != nil {

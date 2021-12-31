@@ -24,31 +24,28 @@ func init() {
 	rootCmd.AddCommand(timeEntryCmd)
 	timeEntryCmd.Flags().StringP("since", "S", "today", "--since=\"today\" | --since=\"2021-12-01\"")
 	timeEntryCmd.Flags().StringP("until", "U", "today", "--until=\"yesterday\" | --until=\"2021-12-31\"")
+	timeEntryCmd.Flags().StringP("format", "f", "table", "output format defaults to table (table, json, csv)")
 }
 
-const timeEntryTpl = `--------Time Entry--------
-Id:          	    %v
-Date:           %v
-Start time:          %v
-End time:            %v
-Duration:             %v
-Task:               %v
-`
-
 func listTimeEntries(cmd *cobra.Command, args []string) error {
-	h := getHakunaClient()
+	h := initHakunaClient()
 
 	since, err := cmd.LocalFlags().GetString("since")
 	if err != nil {
 		return err
 	}
 
-	startDate, err := lib.ParseDate(since)
+	until, err := cmd.LocalFlags().GetString("until")
 	if err != nil {
 		return err
 	}
 
-	until, err := cmd.LocalFlags().GetString("until")
+	format, err := cmd.LocalFlags().GetString("format")
+	if err != nil {
+		return err
+	}
+
+	startDate, err := lib.ParseDate(since)
 	if err != nil {
 		return err
 	}
@@ -67,18 +64,32 @@ func listTimeEntries(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	for i, entry := range timeEntries {
-		fmt.Printf(timeEntryTpl,
-			entry.ID,
-			entry.Date,
-			entry.StartTime,
-			entry.EndTime,
-			entry.Duration,
-			entry.Task.Name,
+	data := make([][]string, len(timeEntries))
+	for i, row := range data {
+		entry := timeEntries[i]
+		data[i] = append(row,
+			fmt.Sprint(entry.ID),
+			fmt.Sprint(entry.Date),
+			fmt.Sprint(entry.StartTime),
+			fmt.Sprint(entry.EndTime),
+			fmt.Sprint(entry.Duration),
+			fmt.Sprint(entry.Note),
+			fmt.Sprint(entry.Task.Name),
 		)
-		if i == len(timeEntries)-1 {
-			fmt.Printf("--------------------------\n")
-		}
 	}
-	return nil
+
+	return lib.RenderData(
+		format,
+		[]string{
+			"ID",
+			"Date",
+			"Start time",
+			"End Time",
+			"Duration",
+			"Note",
+			"Task name",
+		},
+		data,
+		timeEntries,
+	)
 }
