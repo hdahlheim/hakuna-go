@@ -1,27 +1,48 @@
 name: release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  releases-matrix:
+  releases:
     name: Release Go Binary
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, darwin]
-        goarch: [amd64, arm64]
-        exclude:
-          - goarch: arm64
-            goos: linux
     steps:
       - uses: actions/checkout@v2
-      - uses: wangyoucao577/go-release-action@v1.22
+
+      - run: git fetch --tags -f
+
+      - name: Resolve version
+        id: vars
+        run: echo "::set-output name=tag_name::$(git describe --tags --abbrev=0)"
+
+      - name: Install go
+        uses: action/go-setup@v2
         with:
-          goversion: "1.17"
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          md5sum: TRUE
-          asset_name: hakuna-go-${{ matrix.goos }}-${{ matrix.goarch }}
+          go-version: '1.17'
+
+      - name: Build binaries
+        run: make all
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          tag_name: ${{ steps.vars.outputs.tag_name }}
+          body: |
+            * [Linux (arm64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-linux-arm64)
+            * [Linux (x64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-linux-x64)
+            * [macOS (arm64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-macos-arm64)
+            * [macOS (x64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-macos-x64)
+
+          files: |
+            dist/hakuna-go-linux-arm64
+            dist/hakuna-go-linux-arm64-md5
+            dist/hakuna-go-linux-x64
+            dist/hakuna-go-linux-x64-md5
+            dist/hakuna-go-macos-arm64
+            dist/hakuna-go-macos-arm64-md5
+            dist/hakuna-go-macos-x64
+            dist/hakuna-go-macos-x64-md5
