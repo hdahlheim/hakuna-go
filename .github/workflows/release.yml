@@ -33,16 +33,16 @@ jobs:
           tag_name: ${{ steps.vars.outputs.tag_name }}
           body: |
             * [Linux (arm64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-linux-arm64)
-            * [Linux (x64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-linux-x64)
+            * [Linux (amd64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-linux-amd64)
             * [macOS (arm64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-macos-arm64)
-            * [macOS (x64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-macos-x64)
+            * [macOS (amd64)](https://github.com/hdahlheim/hakuna-go/releases/download/${{ steps.vars.outputs.tag_name }}/hakuna-go-macos-amd64)
 
           files: |
             dist/hakuna-go-linux-arm64
             dist/hakuna-go-linux-arm64-md5
-            dist/hakuna-go-linux-x64
-            dist/hakuna-go-linux-x64-md5
+            dist/hakuna-go-linux-amd64
+            dist/hakuna-go-linux-amd64-md5
             dist/hakuna-go-macos-arm64
             dist/hakuna-go-macos-arm64-md5
-            dist/hakuna-go-macos-x64
-            dist/hakuna-go-macos-x64-md5
+            dist/hakuna-go-macos-amd64
+            dist/hakuna-go-macos-amd64-md5

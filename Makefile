@@ -1,6 +1,6 @@
 BINARY_NAME=hakuna-go
 
-all: build-macos-amd64 build-macos-arm64 build-linux-amd64
+all: build-macos-amd64 build-macos-arm64 build-linux-amd64 build-linux-arm64
 
 build-macos-amd64:
 	GOOS=darwin GOARCH=amd64 go build -o ./dist/$(BINARY_NAME)-macos-amd64
