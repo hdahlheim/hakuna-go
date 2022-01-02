@@ -48,11 +48,11 @@ var absenceCmd = &cobra.Command{
 				fmt.Sprint(absence.ID),
 				fmt.Sprint(absence.StartDate),
 				fmt.Sprint(absence.EndDate),
+				fmt.Sprint(absence.AbsenceType.Name),
 				fmt.Sprint(absence.FirstHalfDay),
 				fmt.Sprint(absence.SecondHalfDay),
 				fmt.Sprint(absence.IsRecurring),
 				fmt.Sprint(absence.WeeklyRepeatInterval),
-				fmt.Sprint(absence.AbsenceType.Name),
 				fmt.Sprint(absence.AbsenceType.IsVacation),
 				fmt.Sprint(absence.AbsenceType.GrantsWorkTime),
 			)
@@ -63,11 +63,11 @@ var absenceCmd = &cobra.Command{
 				"Id",
 				"Start Date",
 				"End Date",
-				"First half of the day",
-				"second half of the day",
+				"Absence type",
+				"First half",
+				"Second half",
 				"Is recurring",
 				"Weekly repeat interval",
-				"Absence type",
 				"Is Vacation",
 				"Grants work time",
 			},
@@ -80,5 +80,5 @@ var absenceCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(absenceCmd)
 	absenceCmd.Flags().StringP("year", "y", "", "--year=2021")
-	absenceCmd.Flags().StringP("format", "f", "table", "--year=json")
+	absenceCmd.Flags().StringP("format", "f", "table", "--format=json")
 }
