@@ -1,11 +1,19 @@
+/*
+Copyright © 2021 Henning Dahlheim <hactar@cyberkraft.ch>
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+*/
 package hakuna
 
 import "time"
 
 type Absence struct {
 	ID                   int         `json:"id"`
-	StartDate            time.Time   `json:"start_date"`
-	EndDate              time.Time   `json:"end_date"`
+	StartDate            string      `json:"start_date"`
+	EndDate              string      `json:"end_date"`
 	FirstHalfDay         bool        `json:"first_half_day"`
 	SecondHalfDay        bool        `json:"second_half_day"`
 	IsRecurring          bool        `json:"is_recurring"`
@@ -59,22 +67,26 @@ type Task struct {
 
 type TimeEntry struct {
 	ID                int     `json:"id"`
+	Note              string  `json:"note"`
 	Date              string  `json:"date"`
-	StartTime         string  `json:"start_time"`
-	EndTime           string  `json:"end_time"`
 	Duration          string  `json:"duration"`
 	DurationInSeconds float64 `json:"duration_in_seconds"`
-	Note              string  `json:"note"`
+	StartTime         string  `json:"start_time"`
+	EndTime           string  `json:"end_time"`
 	User              User    `json:"user"`
 	Task              Task    `json:"task"`
 	Project           Project `json:"project"`
 }
 
 type Timer struct {
-	Note      string `json:"note"`
-	StartTime string `json:"start_time"`
-	ProjectID string `json:"project_id"`
-	TaskID    string `json:"task_id"`
+	Note              string  `json:"note"`
+	Date              string  `json:"date"`
+	Duration          string  `json:"duration"`
+	DurationInSeconds float64 `json:"duration_in_seconds"`
+	StartTime         string  `json:"start_time"`
+	User              User    `json:"user"`
+	Task              Task    `json:"task"`
+	Project           Project `json:"project"`
 }
 
 type User struct {
@@ -107,3 +119,8 @@ type CreatTimeEntryReq struct {
 	ProjectID int    `json:"project_id"`
 	TaskID    int    `json:"task_id"`
 }
+
+// type ListTimeEntriesReq struct {
+// 	StartDate string `json:"start_date"`
+// 	EndDate   string `json:"end_date"`
+// }
