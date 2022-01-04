@@ -23,7 +23,7 @@ hakuna timer start --taskId=2 --note="Building cool stuff!"
 ```
 
 If you don't want to use environment variables you can use the `.hakuna.yaml` config file.
-The CLI searches for the config file in two places, the first in the current directory and
+The CLI searches for the config file in two places, first in the current directory and
 after that in the user home directory.
 
 Example using the config file:

@@ -97,9 +97,14 @@ func startTimer(cmd *cobra.Command, args []string) error {
 		startTime = pTime
 	}
 
+	noteFlag, err := cmd.LocalFlags().GetString("note")
+	if err != nil {
+		return err
+	}
+
 	h := initHakunaClient()
 
-	req, err := hakuna.NewStartTimerReq(taskId, startTime, "", 0)
+	req, err := hakuna.NewStartTimerReq(taskId, startTime, noteFlag, 0)
 	if err != nil {
 		return err
 	}

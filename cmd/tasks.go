@@ -24,7 +24,7 @@ import (
 // tasksCmd represents the tasks command
 var tasksCmd = &cobra.Command{
 	Use:   "tasks",
-	Short: "List all task",
+	Short: "List all tasks",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		format, err := cmd.LocalFlags().GetString("format")
 		if err != nil {
